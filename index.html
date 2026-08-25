@@ -1,0 +1,1781 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShowroomDesk | Multi-Brand Vehicle Showroom Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Razorpay SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <!-- Firebase SDK -->
+    <!-- Firebase SDK -->
+    <script type="module" src="./src/config/firebase.js"></script>
+
+    
+    <link rel="stylesheet" href="./src/styles/app.css">
+</head>
+
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal">
+        <div class="payment-modal-content">
+            <div class="spinner" style="margin: 0 auto 1rem;"></div>
+            <h3 style="margin-bottom: 0.5rem;">Processing Payment</h3>
+            <p class="text-muted">Please wait while we redirect you to Razorpay...</p>
+        </div>
+    </div>
+
+    <!-- Landing Page -->
+    <div id="landing-page" class="screen active">
+        <div class="landing-page">
+            <header class="landing-header">
+                <div class="landing-logo">
+                    <i class="fas fa-car"></i>
+                    <h1>ShowroomDesk</h1>
+                </div>
+                <nav class="landing-nav">
+                    <button class="btn btn-outline" onclick="app.showRegistrationScreen()">
+                        Register Now
+                    </button>
+                    <button class="btn btn-primary" onclick="app.showLoginScreen()">
+                        Login
+                    </button>
+                </nav>
+            </header>
+
+            <div class="landing-hero">
+                <div class="hero-content">
+                    <h1>Complete CRM Solution for Every Vehicle Showroom</h1>
+                    <p>Cars • Bikes • Tractors • 3-Wheelers • Exchange</p>
+                    <p style="font-size: 1.1rem;">One platform to manage all your enquiries, inventory, and team.</p>
+
+                    <button class="btn btn-primary btn-lg" onclick="app.showRegistrationScreen()">
+                        <i class="fas fa-rocket"></i> Start 30-Day Free Trial
+                    </button>
+
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <div class="number">500+</div>
+                            <div class="label">Showrooms</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="number">50k+</div>
+                            <div class="label">Enquiries</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="number">4.8★</div>
+                            <div class="label">Rating</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-image">
+                    <i class="fas fa-store"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Screen -->
+    <div id="registration-screen" class="screen">
+        <div class="registration-container">
+            <div class="registration-header">
+                <div class="logo-badge">
+                    <i class="fas fa-car"></i>
+                </div>
+                <h2>Register Your Showroom</h2>
+                <p class="text-muted">Complete the steps below to start your 30-day free trial</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="registration-progress">
+                <div class="progress-line"></div>
+                <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+
+                <div class="progress-step active" id="progress-step-1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Showroom Details</div>
+                </div>
+                <div class="progress-step" id="progress-step-2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Vehicle Types</div>
+                </div>
+                <div class="progress-step" id="progress-step-3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Brands & Models</div>
+                </div>
+                <div class="progress-step" id="progress-step-4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Subscription</div>
+                </div>
+            </div>
+
+            <!-- Step 1: Showroom Details -->
+            <div id="step-1" class="registration-step active">
+                <h3 class="mb-3">Showroom Information</h3>
+
+                <div class="form-group">
+                    <label>Showroom Name *</label>
+                    <input type="text" id="showroom-name" class="form-control" placeholder="e.g., Patna Motors">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Owner Full Name *</label>
+                        <input type="text" id="owner-name" class="form-control" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Owner Phone *</label>
+                        <input type="tel" id="owner-phone" class="form-control" placeholder="10-digit mobile number">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email Address *</label>
+                        <input type="email" id="owner-email" class="form-control" placeholder="Your email for login">
+                    </div>
+                    <div class="form-group">
+                        <label>Password *</label>
+                        <input type="password" id="owner-password" class="form-control" placeholder="Create password">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Showroom Address *</label>
+                    <textarea id="showroom-address" class="form-control" rows="2" placeholder="Full address"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>City *</label>
+                        <input type="text" id="showroom-city" class="form-control" placeholder="e.g., Patna">
+                    </div>
+                    <div class="form-group">
+                        <label>State *</label>
+                        <select id="showroom-state" class="form-control">
+                            <option value="">Select State</option>
+                            <option value="Bihar">Bihar</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="Jharkhand">Jharkhand</option>
+                            <option value="Delhi">Delhi</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="trial-banner">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fas fa-gift"></i>
+                        <div>
+                            <strong>30-Day Free Trial</strong>
+                            <p style="margin: 0; opacity: 0.9;">No credit card required • Cancel anytime</p>
+                        </div>
+                    </div>
+                    <div class="trial-countdown">
+                        <i class="fas fa-clock"></i> Full access for 30 days
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block btn-lg" onclick="app.goToStep(2)">
+                    Next: Select Vehicle Types <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- Step 2: Vehicle Types -->
+            <div id="step-2" class="registration-step">
+                <h3 class="mb-3">What vehicles do you sell?</h3>
+                <p class="text-muted">Select all vehicle types your showroom deals in</p>
+
+                <div class="vehicle-grid">
+                    <div class="vehicle-card car" data-type="car" onclick="app.toggleVehicleType('car')">
+                        <div class="vehicle-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="vehicle-name">Cars</div>
+                        <div class="vehicle-desc">Passenger vehicles, SUVs</div>
+                    </div>
+
+                    <div class="vehicle-card bike" data-type="bike" onclick="app.toggleVehicleType('bike')">
+                        <div class="vehicle-icon">
+                            <i class="fas fa-motorcycle"></i>
+                        </div>
+                        <div class="vehicle-name">Bikes</div>
+                        <div class="vehicle-desc">Motorcycles, Scooters</div>
+                    </div>
+
+                    <div class="vehicle-card tractor" data-type="tractor" onclick="app.toggleVehicleType('tractor')">
+                        <div class="vehicle-icon">
+                            <i class="fas fa-tractor"></i>
+                        </div>
+                        <div class="vehicle-name">Tractors</div>
+                        <div class="vehicle-desc">Agricultural equipment</div>
+                    </div>
+
+                    <div class="vehicle-card threewheeler" data-type="threewheeler"
+                        onclick="app.toggleVehicleType('threewheeler')">
+                        <div class="vehicle-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="vehicle-name">3-Wheelers</div>
+                        <div class="vehicle-desc">Auto rickshaws, Loaders</div>
+                    </div>
+                </div>
+
+                <div id="selected-vehicles" class="selected-badges"></div>
+                <p class="text-muted mt-2"><i class="fas fa-info-circle"></i> Exchange enquiries can be handled for any
+                    vehicle type</p>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-outline" onclick="app.goToStep(1)">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-primary" onclick="app.goToStep(3)" id="continue-to-brands" disabled>
+                        Continue to Brands & Models <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Brands & Models -->
+            <div id="step-3" class="registration-step">
+                <h3 class="mb-3">Select Brands & Add Models</h3>
+                <p class="text-muted">Choose brands you sell and add specific models available at your showroom</p>
+
+                <div id="brands-container" class="brands-section"></div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-outline" onclick="app.goToStep(2)">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-primary" onclick="app.goToStep(4)">
+                        Continue to Subscription <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Subscription & Payment -->
+            <div id="step-4" class="registration-step">
+                <div class="plan-card">
+                    <div class="plan-badge">30-DAY FREE TRIAL</div>
+
+                    <h2 style="text-align: center; margin-bottom: 1rem;">ShowroomDesk Complete Plan</h2>
+
+                    <div class="plan-price">
+                        <span class="plan-amount">₹999</span>
+                        <span class="plan-period">/month</span>
+                        <div class="plan-saving">Billed annually at ₹10,999 (Save ₹1,989)</div>
+                    </div>
+
+                    <div class="plan-features">
+                        <div class="plan-feature">
+                            <i class="fas fa-check"></i>
+                            <span><strong>Unlimited Users</strong> - Add your entire sales team</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check"></i>
+                            <span><strong>Unlimited Enquiries</strong> - No monthly limits</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check"></i>
+                            <span><strong>Multi-Vehicle Support</strong> - Cars, Bikes, Tractors, 3-Wheelers</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check"></i>
+                            <span><strong>Exchange Enquiries</strong> - Handle vehicle exchange requests</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check"></i>
+                            <span><strong>Custom Brand Models</strong> - Add unlimited models per brand</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check"></i>
+                            <span><strong>Inventory Management</strong> - Track available models</span>
+                        </div>
+                        <div class="plan-feature">
+                            <i class="fas fa-check"></i>
+                            <span><strong>Team Management</strong> - Add sales managers, track performance</span>
+                        </div>
+                    </div>
+
+                    <h3 class="mb-3">Choose Payment Method</h3>
+
+                    <div class="payment-methods">
+                        <div class="payment-method selected" data-method="trial"
+                            onclick="app.selectPaymentMethod('trial')">
+                            <i class="fas fa-gift"></i>
+                            <span>Free Trial</span>
+                        </div>
+                        <div class="payment-method" data-method="razorpay"
+                            onclick="app.selectPaymentMethod('razorpay')">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Online Payment</span>
+                        </div>
+                        <div class="payment-method" data-method="bank" onclick="app.selectPaymentMethod('bank')">
+                            <i class="fas fa-university"></i>
+                            <span>Bank Transfer</span>
+                        </div>
+                    </div>
+
+                    <div id="bank-details" class="bank-details" style="display: none;">
+                        <h4 style="margin-bottom: 1rem;">Bank Transfer Details</h4>
+                        <p><strong>Account Name:</strong> ShowroomDesk CRM Solutions</p>
+                        <p><strong>Account Number:</strong> 1234567890</p>
+                        <p><strong>IFSC Code:</strong> SBIN0001234</p>
+                        <p><strong>Bank:</strong> State Bank of India</p>
+                        <p><strong>Amount:</strong> ₹10,999 (Annual)</p>
+                        <p class="text-muted mt-2">After payment, email receipt to accounts@showroomdesk.com</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-outline" onclick="app.goToStep(3)">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-primary btn-lg" onclick="app.completeRegistration()" style="flex: 1;"
+                        id="complete-registration-btn">
+                        <i class="fas fa-check-circle"></i> Complete Registration & Start Free Trial
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+        <div class="registration-container" style="max-width: 500px;">
+            <div class="registration-header">
+                <div class="logo-badge">
+                    <i class="fas fa-car"></i>
+                </div>
+                <h2>Login to ShowroomDesk</h2>
+                <p class="text-muted">Access your showroom dashboard</p>
+            </div>
+
+            <form id="login-form" onsubmit="event.preventDefault(); app.handleLogin();">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="Your registered email"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="Your password"
+                        required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+
+                <div class="text-center mt-3">
+                    <a href="#" onclick="app.forgotPassword()" style="color: var(--primary);">Forgot Password?</a>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted">Don't have an account?</p>
+                    <button type="button" class="btn btn-outline" onclick="app.showRegistrationScreen()">
+                        Register Your Showroom
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App Screen - Complete CRM Dashboard -->
+    <div id="app" class="screen">
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="header-container">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>ShowroomDesk</h1>
+                        <span class="logo-subtitle" id="header-showroom-name">Loading...</span>
+                    </div>
+                </div>
+
+                <nav class="main-nav">
+                    <button class="nav-btn active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </button>
+                    <button class="nav-btn" data-section="enquiries">
+                        <i class="fas fa-users"></i>
+                        <span class="nav-text">Enquiries</span>
+                        <span class="nav-badge" id="enquiries-badge">0</span>
+                    </button>
+                    <button class="nav-btn" data-section="add-enquiry">
+                        <i class="fas fa-plus-circle"></i>
+                        <span class="nav-text">Add Enquiry</span>
+                    </button>
+                    <button class="nav-btn owner-only" data-section="interventions">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span class="nav-text">Interventions</span>
+                        <span class="nav-badge" id="interventions-badge">0</span>
+                    </button>
+                    <button class="nav-btn" data-section="analytics">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="nav-text">Analytics</span>
+                    </button>
+                    <button class="nav-btn" data-section="reports">
+                        <i class="fas fa-file-alt"></i>
+                        <span class="nav-text">Reports</span>
+                    </button>
+                    <button class="nav-btn" data-section="inventory">
+                        <i class="fas fa-boxes"></i>
+                        <span class="nav-text">Inventory</span>
+                    </button>
+                    <button class="nav-btn owner-only" data-section="team">
+                        <i class="fas fa-users-cog"></i>
+                        <span class="nav-text">Team</span>
+                    </button>
+                    <button class="nav-btn" data-section="today">
+                        <i class="fas fa-calendar-day"></i>
+                        <span class="nav-text">Today</span>
+                    </button>
+                    <button class="nav-btn owner-only" data-section="today-hold">
+                        <i class="fas fa-clock"></i>
+                        <span class="nav-text">Today's Hold</span>
+                        <span class="nav-badge" id="today-hold-badge">0</span>
+                    </button>
+                    <button class="nav-btn" data-section="next-10-days">
+                        <i class="fas fa-calendar-week"></i>
+                        <span class="nav-text">Next 10 Days</span>
+                        <span class="nav-badge" id="next-10-days-badge">0</span>
+                    </button>
+                    <button class="nav-btn owner-only" data-section="pamphlets">
+                        <i class="fas fa-images"></i>
+                        <span class="nav-text">Pamphlets</span>
+                        <span class="nav-badge" id="pamphlets-badge">0</span>
+                    </button>
+                </nav>
+
+                <div class="header-right">
+                    <!-- Upgrade Button in Header -->
+                    <button class="btn-upgrade" onclick="app.showUpgradeModal()">
+                        <i class="fas fa-crown"></i> Upgrade Plan
+                    </button>
+
+                    <div class="user-dropdown">
+                        <button class="user-profile" type="button" onclick="app.toggleUserMenu(event)" aria-expanded="false">
+                            <div class="user-avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name" id="user-name">User</span>
+                                <span class="user-role" id="user-role">Loading...</span>
+                            </div>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item" type="button" onclick="app.showEditProfileModal()">
+                                <i class="fas fa-user-edit"></i> Edit Profile
+                            </button>
+                            <button class="dropdown-item" onclick="app.showUpgradeModal()">
+                                <i class="fas fa-crown"></i> Upgrade Plan
+                            </button>
+                            <button class="dropdown-item" onclick="app.logout()">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Edit Profile Modal -->
+        <div id="edit-profile-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-user-edit"></i> Edit Profile</h3>
+                    <button class="modal-close" type="button" onclick="app.closeEditProfileModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-profile-form" onsubmit="event.preventDefault(); app.saveEditProfile();">
+                        <div class="form-group">
+                            <label class="required">Full Name</label>
+                            <input type="text" id="profile-name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="profile-email" class="form-control" readonly disabled>
+                            <small class="text-muted">Email changes require account re-verification.</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Phone Number</label>
+                            <input type="tel" id="profile-phone" class="form-control" pattern="[0-9]{10}" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" type="button" onclick="app.closeEditProfileModal()">Cancel</button>
+                    <button class="btn btn-primary" type="button" onclick="app.saveEditProfile()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="app-content">
+            <!-- Dashboard Section - Updated with Subscription Banner -->
+            <section id="dashboard" class="section active">
+                <!-- Subscription Status Banner -->
+                <div class="subscription-banner" id="subscription-banner">
+                    <div class="subscription-info">
+                        <i class="fas fa-crown"></i>
+                        <div class="subscription-details">
+                            <span class="subscription-status" id="subscription-status">Loading subscription...</span>
+                            <span class="subscription-expiry" id="subscription-expiry"></span>
+                        </div>
+                    </div>
+                    <div class="subscription-actions">
+                        <button class="btn-upgrade" onclick="app.showUpgradeModal()">
+                            <i class="fas fa-rocket"></i> Upgrade Now
+                        </button>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+                    <div class="date-picker" id="current-date"></div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(67, 97, 238, 0.1); color: var(--primary);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-label">Total Enquiries</div>
+                        <div class="stat-value" id="dashboard-total">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(255, 159, 28, 0.1); color: var(--warning);">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="stat-label">Hot Leads</div>
+                        <div class="stat-value" id="dashboard-hot">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(46, 196, 182, 0.1); color: var(--success);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-label">Today's Follow-ups</div>
+                        <div class="stat-value" id="dashboard-today">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--booking);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-label">Booking Done</div>
+                        <div class="stat-value" id="dashboard-booking">0</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-calendar-check"></i> Today's Follow-ups</h3>
+                        </div>
+                        <div class="card-body" id="today-followups">
+                            <div class="text-center text-muted py-4">No follow-ups scheduled</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-exclamation-triangle"></i> Pending Interventions</h3>
+                        </div>
+                        <div class="card-body" id="pending-interventions">
+                            <div class="text-center text-muted py-4">No interventions</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid" style="margin-top: 2rem;">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-pie"></i> Vehicle-wise Enquiries</h3>
+                        </div>
+                        <div class="card-body" id="vehicle-stats">
+                            <div class="text-center text-muted py-4">No data available</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-trophy"></i> Top Performing Sales</h3>
+                        </div>
+                        <div class="card-body" id="top-sales">
+                            <div class="text-center text-muted py-4">No data available</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Enquiries Section -->
+            <section id="enquiries" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-users"></i> Customer Enquiries</h2>
+                    <button class="btn btn-primary" onclick="app.switchSection('add-enquiry')">
+                        <i class="fas fa-plus"></i> New Enquiry
+                    </button>
+                </div>
+
+                <!-- Search and Filter Bar -->
+                <div class="search-filter-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="enquiry-search" placeholder="Search by customer name, phone, or model..."
+                            oninput="app.filterEnquiries()">
+                    </div>
+
+                    <div class="filter-group">
+                        <select id="filter-source" onchange="app.filterEnquiries()">
+                            <option value="">All Sources</option>
+                            <option value="Walk In Customer">ðŸš¶ Walk In Customer</option>
+                            <option value="Advertisement">ðŸ“¢ Advertisement</option>
+                            <option value="CRM enquiry">ðŸ“± CRM Enquiry</option>
+                            <option value="Field Enquiry">ðŸŒ Field Enquiry</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="filter-lead-type" onchange="app.filterEnquiries()">
+                            <option value="">All Lead Types</option>
+                            <option value="hot">ðŸ”¥ Hot (Status: Hot)</option>
+                            <option value="warm">ðŸŸ¡ Warm (Follow-up within 30 days)</option>
+                            <option value="cold">❄️ Cold (Follow-up after 30+ days)</option>
+                        </select>
+                    </div>
+
+                    <!-- Sales Manager Filter - Only visible to owners -->
+                    <div class="filter-group owner-only" id="sales-manager-filter-container">
+                        <select id="filter-sales-manager" onchange="app.filterEnquiries()">
+                            <option value="">All Sales Managers</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+
+                    <button class="clear-filters" onclick="app.clearFilters()">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+
+                    <span class="results-count" id="enquiry-results-count">Showing all enquiries</span>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>Source</th>
+                                <th>Type</th>
+                                <th>Model</th>
+                                <th>Status</th>
+                                <th>Booking Amount</th>
+                                <th>Follow-up</th>
+                                <th>Last Update</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="enquiries-list"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Add Enquiry Section - Updated with Booking Done status and amount field -->
+            <section id="add-enquiry" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-plus-circle"></i> Add New Enquiry</h2>
+                </div>
+
+                <form id="enquiry-form" class="enquiry-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="required">Customer Name</label>
+                            <input type="text" id="enquiry-customer-name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Phone Number</label>
+                            <input type="tel" id="enquiry-phone" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="enquiry-email" class="form-control">
+                        </div>
+
+                        <!-- Enquiry Source Field -->
+                        <div class="form-group">
+                            <label class="required">Enquiry Source</label>
+                            <select id="enquiry-source" class="form-control" required>
+                                <option value="">Select Source</option>
+                                <option value="Walk In Customer">ðŸš¶ Walk In Customer</option>
+                                <option value="Advertisement">ðŸ“¢ Advertisement</option>
+                                <option value="CRM enquiry">ðŸ“± CRM Enquiry</option>
+                                <option value="Field Enquiry">ðŸŒ Field Enquiry</option>
+                            </select>
+                        </div>
+
+                        <!-- Exchange Yes/No Toggle -->
+                        <!-- Exchange Yes/No Toggle -->
+                        <div class="form-group full-width">
+                            <label>Is this an Exchange Enquiry?</label>
+                            <div class="toggle-switch">
+                                <label>
+                                    <input type="radio" name="is-exchange" value="no" checked
+                                        onchange="app.toggleExchangeFields()"> No (New Vehicle Purchase)
+                                </label>
+                                <label>
+                                    <input type="radio" name="is-exchange" value="yes"
+                                        onchange="app.toggleExchangeFields()"> Yes (Customer wants to exchange)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Regular vehicle fields (ALWAYS visible) -->
+                        <div id="regular-vehicle-fields">
+                            <div class="form-group full-width">
+                                <label class="required">Select Vehicle Model (Customer's Interest)</label>
+                                <select id="enquiry-model" class="form-control" required>
+                                    <option value="">Select a model from inventory</option>
+                                    <!-- Models will be populated from inventory -->
+                                </select>
+                                <small class="text-muted" id="inventory-count">Loading inventory...</small>
+                            </div>
+                        </div>
+
+                        <!-- Exchange fields (only visible when exchange is YES) -->
+                        <div id="exchange-fields" style="display: none;" class="exchange-section">
+                            <h4><i class="fas fa-exchange-alt"></i> Exchange Vehicle Details</h4>
+                            <div class="form-group">
+                                <label>Exchange Vehicle (Customer's Old Vehicle)</label>
+                                <input type="text" id="enquiry-exchange-model" class="form-control"
+                                    placeholder="e.g., Maruti Swift 2018, Hero Splendor 2020">
+                                <small class="text-muted">Enter the vehicle the customer wants to exchange</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="enquiry-status" class="form-control" onchange="app.toggleBookingFields()">
+                                <option value="hot">Hot</option>
+                                <option value="warm">Warm</option>
+                                <option value="cold">Cold</option>
+                                <option value="booking">Booking Done</option>
+                                <option value="closed">Closed</option>
+                                <option value="lost">Lost</option>
+                            </select>
+                        </div>
+
+                        <!-- NEW: Booking Amount Field - Shows only when status is Booking Done -->
+                        <div id="booking-fields" style="display: none;" class="booking-section full-width">
+                            <h4><i class="fas fa-rupee-sign"></i> Booking Details</h4>
+                            <div class="form-group">
+                                <label>Booking Amount (₹)</label>
+                                <div class="booking-amount-input">
+                                    <span class="currency-symbol">₹</span>
+                                    <input type="number" id="enquiry-booking-amount" class="form-control"
+                                        placeholder="Enter booking amount" min="0" step="1000">
+                                </div>
+                                <small class="text-muted">Enter the amount on which booking was done</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Next Follow-up</label>
+                            <input type="date" id="enquiry-followup" class="form-control">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Remarks</label>
+                            <textarea id="enquiry-remarks" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Enquiry</button>
+                        <button type="button" class="btn btn-outline"
+                            onclick="app.switchSection('enquiries')">Cancel</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Remarks Edit Modal -->
+            <div id="remarks-modal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Edit Remarks</h3>
+                        <button class="modal-close" onclick="app.closeRemarksModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="remarks-form" onsubmit="event.preventDefault(); app.saveRemarks();">
+                            <div class="form-group">
+                                <label>Customer: <span id="remarks-customer-name"></span></label>
+                                <textarea id="remarks-text" class="form-control" rows="5"
+                                    placeholder="Enter remarks..."></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="app.closeRemarksModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="app.saveRemarks()">Save Remarks</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Remarks History Modal - NEW -->
+            <div id="remarks-history-modal" class="modal-overlay">
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-history"></i> Remarks Change History</h3>
+                        <button class="modal-close" onclick="app.closeRemarksHistoryModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div
+                            style="margin-bottom: 1rem; padding: 0.5rem; background: var(--bg-secondary); border-radius: var(--radius);">
+                            <p><strong>Customer:</strong> <span id="history-customer-name"></span></p>
+                            <p><strong>Current Remarks:</strong> <span id="history-current-remarks"></span></p>
+                        </div>
+                        <div id="remarks-history-list" style="max-height: 400px; overflow-y: auto;">
+                            <!-- History items will be populated here -->
+                            <div class="text-center text-muted py-4">Loading history...</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="app.closeRemarksHistoryModal()">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Status Update Modal -->
+            <div id="status-update-modal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Update Enquiry Status</h3>
+                        <button class="modal-close" onclick="app.closeStatusModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="status-update-form" onsubmit="event.preventDefault(); app.saveStatusUpdate();">
+                            <div class="form-group">
+                                <label>Customer: <span id="status-customer-name"></span></label>
+                            </div>
+                            <div class="form-group">
+                                <label>Current Status</label>
+                                <input type="text" id="current-status" class="form-control" readonly disabled>
+                            </div>
+                            <div class="form-group">
+                                <label>New Status</label>
+                                <select id="new-status" class="form-control" onchange="app.toggleStatusBookingFields()">
+                                    <option value="new">New</option>
+                                    <option value="followup">Follow-up</option>
+                                    <option value="hot">Hot</option>
+                                    <option value="booking">Booking Done</option>
+                                    <option value="closed">Closed</option>
+                                    <option value="lost">Lost</option>
+                                </select>
+                            </div>
+
+                            <!-- NEW: Booking Amount Field in Status Modal -->
+                            <div id="status-booking-fields" style="display: none;" class="booking-section">
+                                <h4><i class="fas fa-rupee-sign"></i> Booking Details</h4>
+                                <div class="form-group">
+                                    <label>Booking Amount (₹)</label>
+                                    <div class="booking-amount-input">
+                                        <span class="currency-symbol">₹</span>
+                                        <input type="number" id="status-booking-amount" class="form-control"
+                                            placeholder="Enter booking amount" min="0" step="1000">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Remarks (Optional)</label>
+                                <textarea id="status-remarks" class="form-control" rows="3"
+                                    placeholder="Add any remarks about this status change"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="app.closeStatusModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="app.saveStatusUpdate()">Update Status</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Enquiry Modal - NEW -->
+            <div id="edit-enquiry-modal" class="modal-overlay">
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-edit"></i> Edit Enquiry</h3>
+                        <button class="modal-close" onclick="app.closeEditEnquiryModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div
+                            style="margin-bottom: 1rem; padding: 0.5rem; background: var(--bg-secondary); border-radius: var(--radius);">
+                            <p><strong>Customer:</strong> <span id="edit-customer-name"></span></p>
+                            <p><strong>Phone:</strong> <span id="edit-phone"></span></p>
+                        </div>
+
+                        <form id="edit-enquiry-form" onsubmit="event.preventDefault(); app.saveEditEnquiry();">
+                            <!-- Exchange Yes/No Toggle -->
+                            <div class="form-group full-width">
+                                <label>Is this an Exchange Enquiry?</label>
+                                <div class="toggle-switch">
+                                    <label>
+                                        <input type="radio" name="edit-is-exchange" id="edit-exchange-no" value="no"
+                                            onchange="app.toggleEditExchangeFields()"> No (New Vehicle Purchase)
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="edit-is-exchange" id="edit-exchange-yes" value="yes"
+                                            onchange="app.toggleEditExchangeFields()"> Yes (Customer wants to exchange)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Regular vehicle fields (ALWAYS visible in edit) -->
+                            <div id="edit-regular-vehicle-fields">
+                                <div class="form-group full-width">
+                                    <label>Select Vehicle Model (Customer's Interest)</label>
+                                    <select id="edit-enquiry-model" class="form-control">
+                                        <option value="">Select a model from inventory</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Exchange fields (only visible when exchange is YES) -->
+                            <div id="edit-exchange-fields" style="display: none;" class="exchange-section">
+                                <h4><i class="fas fa-exchange-alt"></i> Exchange Vehicle Details</h4>
+                                <div class="form-group">
+                                    <label>Exchange Vehicle (Customer's Old Vehicle)</label>
+                                    <input type="text" id="edit-exchange-model" class="form-control"
+                                        placeholder="e.g., Maruti Swift 2018, Hero Splendor 2020">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="edit-status" class="form-control" onchange="app.toggleEditBookingFields()">
+                                    <option value="new">New</option>
+                                    <option value="followup">Follow-up</option>
+                                    <option value="hot">Hot</option>
+                                    <option value="booking">Booking Done</option>
+                                    <option value="closed">Closed</option>
+                                    <option value="lost">Lost</option>
+                                </select>
+                            </div>
+
+                            <!-- Booking Amount Field -->
+                            <div id="edit-booking-fields" style="display: none;" class="booking-section full-width">
+                                <h4><i class="fas fa-rupee-sign"></i> Booking Details</h4>
+                                <div class="form-group">
+                                    <label>Booking Amount (₹)</label>
+                                    <div class="booking-amount-input">
+                                        <span class="currency-symbol">₹</span>
+                                        <input type="number" id="edit-booking-amount" class="form-control"
+                                            placeholder="Enter booking amount" min="0" step="1000">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Next Follow-up</label>
+                                <input type="date" id="edit-followup" class="form-control">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>Remarks</label>
+                                <textarea id="edit-remarks" class="form-control" rows="3"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="app.closeEditEnquiryModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="app.saveEditEnquiry()">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upgrade Modal -->
+            <div id="upgrade-modal" class="modal-overlay">
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-crown" style="color: gold;"></i> Upgrade Your Plan</h3>
+                        <button class="modal-close" onclick="app.closeUpgradeModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="plan-card" style="margin: 0;">
+                            <div class="plan-badge">RECOMMENDED</div>
+
+                            <h2 style="text-align: center; margin-bottom: 1rem;">ShowroomDesk Complete Plan</h2>
+
+                            <div class="plan-price">
+                                <span class="plan-amount">₹999</span>
+                                <span class="plan-period">/month</span>
+                                <div class="plan-saving">Billed annually at ₹10,999 (Save ₹1,989)</div>
+                            </div>
+
+                            <div class="plan-features">
+                                <div class="plan-feature">
+                                    <i class="fas fa-check" style="color: var(--success);"></i>
+                                    <span><strong>Unlimited Users</strong> - Add your entire sales team</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="fas fa-check" style="color: var(--success);"></i>
+                                    <span><strong>Unlimited Enquiries</strong> - No monthly limits</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="fas fa-check" style="color: var(--success);"></i>
+                                    <span><strong>Multi-Vehicle Support</strong> - Cars, Bikes, Tractors,
+                                        3-Wheelers</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="fas fa-check" style="color: var(--success);"></i>
+                                    <span><strong>Exchange Enquiries</strong> - Handle vehicle exchange requests</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="fas fa-check" style="color: var(--success);"></i>
+                                    <span><strong>Custom Brand Models</strong> - Add unlimited models per brand</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="fas fa-check" style="color: var(--success);"></i>
+                                    <span><strong>Inventory Management</strong> - Track available models</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="fas fa-check" style="color: var(--success);"></i>
+                                    <span><strong>Team Management</strong> - Add sales managers, track
+                                        performance</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="fas fa-check" style="color: var(--success);"></i>
+                                    <span><strong>Advanced Analytics</strong> - Track conversion rates and team
+                                        performance</span>
+                                </div>
+                                <div class="plan-feature">
+                                    <i class="fas fa-check" style="color: var(--success);"></i>
+                                    <span><strong>Priority Support</strong> - 24/7 customer support</span>
+                                </div>
+                            </div>
+
+                            <h3 class="mb-3">Choose Payment Method</h3>
+
+                            <div class="payment-methods">
+                                <div class="payment-method selected" data-method="razorpay"
+                                    onclick="app.selectUpgradePaymentMethod('razorpay')">
+                                    <i class="fas fa-credit-card"></i>
+                                    <span>Online Payment</span>
+                                </div>
+                                <div class="payment-method" data-method="bank"
+                                    onclick="app.selectUpgradePaymentMethod('bank')">
+                                    <i class="fas fa-university"></i>
+                                    <span>Bank Transfer</span>
+                                </div>
+                            </div>
+
+                            <div id="upgrade-bank-details" class="bank-details" style="display: none;">
+                                <h4 style="margin-bottom: 1rem;">Bank Transfer Details</h4>
+                                <p><strong>Account Name:</strong> ShowroomDesk CRM Solutions</p>
+                                <p><strong>Account Number:</strong> 1234567890</p>
+                                <p><strong>IFSC Code:</strong> SBIN0001234</p>
+                                <p><strong>Bank:</strong> State Bank of India</p>
+                                <p><strong>Amount:</strong> ₹10,999 (Annual)</p>
+                                <p class="text-muted mt-2">After payment, email receipt to accounts@showroomdesk.com
+                                    with your showroom name.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="app.closeUpgradeModal()">Cancel</button>
+                        <button class="btn btn-primary btn-lg" onclick="app.processUpgrade()" id="upgrade-btn">
+                            <i class="fas fa-crown"></i> Upgrade Now - ₹10,999/year
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interventions Section - Now only visible to owner -->
+            <section id="interventions" class="section owner-only">
+                <div class="section-header">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Owner Interventions</h2>
+                    <button class="btn btn-warning" onclick="app.createNewIntervention()">
+                        <i class="fas fa-plus"></i> New Intervention
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Priority</th>
+                                <th>Message</th>
+                                <th>Assigned To</th>
+                                <th>Deadline</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="interventions-list"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-line"></i> Analytics Dashboard</h2>
+                </div>
+
+                <div class="analytics-stats">
+                    <div class="analytics-card">
+                        <div class="analytics-value" id="analytics-conversion">0%</div>
+                        <div class="analytics-label">Conversion Rate</div>
+                        <div class="analytics-progress">
+                            <div class="progress-bar" id="conversion-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <div class="analytics-value" id="analytics-avg-response">0</div>
+                        <div class="analytics-label">Avg Response Time</div>
+                        <div class="analytics-progress">
+                            <div class="progress-bar" id="response-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <div class="analytics-value" id="analytics-satisfaction">0%</div>
+                        <div class="analytics-label">Customer Satisfaction</div>
+                        <div class="analytics-progress">
+                            <div class="progress-bar" id="satisfaction-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid" style="margin-top: 2rem;">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-bar"></i> Enquiries by Status</h3>
+                        </div>
+                        <div class="card-body" id="enquiries-by-status"></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-pie"></i> Enquiries by Vehicle</h3>
+                        </div>
+                        <div class="card-body" id="enquiries-by-vehicle"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section - Updated with Booking Report -->
+            <section id="reports" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-alt"></i> Reports</h2>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="report-card" onclick="app.generateReport('daily')">
+                        <div class="report-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="report-title">Daily Report</div>
+                        <div class="report-desc">Today's enquiries and follow-ups</div>
+                    </div>
+
+                    <div class="report-card" onclick="app.generateReport('weekly')">
+                        <div class="report-icon">
+                            <i class="fas fa-calendar-week"></i>
+                        </div>
+                        <div class="report-title">Weekly Report</div>
+                        <div class="report-desc">Last 7 days performance</div>
+                    </div>
+
+                    <div class="report-card" onclick="app.generateReport('monthly')">
+                        <div class="report-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="report-title">Monthly Report</div>
+                        <div class="report-desc">Last 30 days analysis</div>
+                    </div>
+
+                    <div class="report-card" onclick="app.generateReport('sales')">
+                        <div class="report-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="report-title">Sales Performance</div>
+                        <div class="report-desc">Team performance metrics</div>
+                    </div>
+
+                    <div class="report-card" onclick="app.generateReport('inventory')">
+                        <div class="report-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="report-title">Inventory Report</div>
+                        <div class="report-desc">All available models</div>
+                    </div>
+
+                    <div class="report-card" onclick="app.generateReport('exchange')">
+                        <div class="report-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="report-title">Exchange Report</div>
+                        <div class="report-desc">All exchange enquiries</div>
+                    </div>
+
+                    <div class="report-card" onclick="app.generateReport('booking')">
+                        <div class="report-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="report-title">Booking Report</div>
+                        <div class="report-desc">All bookings with amounts</div>
+                    </div>
+
+                    <div class="report-card" onclick="app.generateReport('interventions')">
+                        <div class="report-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="report-title">Interventions Report</div>
+                        <div class="report-desc">All owner interventions</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Inventory Section -->
+            <section id="inventory" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-boxes"></i> Available Models</h2>
+                    <button class="btn btn-primary" onclick="app.showAddInventoryModal()">
+                        <i class="fas fa-plus"></i> Add New Model
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="app.refreshInventory()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Brand</th>
+                                <th>Model</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Added On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-list">
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading inventory...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Team Section (Owner Only) - UPDATED with Password Column -->
+            <section id="team" class="section owner-only">
+                <div class="section-header">
+                    <h2><i class="fas fa-users-cog"></i> Team Management</h2>
+                    <button class="btn btn-primary" onclick="app.showAddTeamModal()">
+                        <i class="fas fa-user-plus"></i> Add Team Member
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Role</th>
+                                <th>Password</th>
+                                <th>Enquiries</th>
+                                <th>Closed Deals</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="team-list"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Today's Schedule Section -->
+            <section id="today" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-calendar-day"></i> Today's Schedule</h2>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Customer</th>
+                                <th>Vehicle</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Assigned To</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="today-list"></tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- Today's Hold Section - Shows enquiries with changed follow-up dates -->
+            <section id="today-hold" class="section owner-only">
+                <div class="section-header">
+                    <h2><i class="fas fa-clock"></i> Today's Hold</h2>
+                    <div class="date-picker" id="hold-date"></div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>Original Date</th>
+                                <th>New Date</th>
+                                <th>Changed By</th>
+                                <th>Changed At</th>
+                                <th>Reason</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="today-hold-list"></tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- Next 10 Days Follow-up Section -->
+            <!-- Next 10 Days Follow-up Section -->
+            <section id="next-10-days" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-calendar-week"></i> Next 10 Days Follow-ups</h2>
+                    <div class="date-range">
+                        <span id="next-10-days-range"></span>
+                        <button class="btn btn-sm btn-outline" onclick="app.refreshNext10Days()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(67, 97, 238, 0.1);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-label">Total Upcoming</div>
+                        <div class="stat-value" id="upcoming-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(231, 29, 54, 0.1);">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="stat-label">Today's Follow-ups</div>
+                        <div class="stat-value" id="today-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(255, 159, 28, 0.1);">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="stat-label">Next 3 Days</div>
+                        <div class="stat-value" id="priority-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(46, 196, 182, 0.1);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-label">Active Enquiries</div>
+                        <div class="stat-value" id="active-count">0</div>
+                    </div>
+                </div>
+
+                <!-- Day-wise Accordion Container -->
+                <div id="day-wise-container"></div>
+            </section>
+            <!-- Pamphlet Management Section -->
+            <section id="pamphlets" class="section owner-only">
+                <div class="section-header">
+                    <h2><i class="fas fa-images"></i> Pamphlet Management</h2>
+                    <div class="pamphlet-actions">
+                        <button class="btn btn-primary" onclick="app.showUploadPamphletModal()">
+                            <i class="fas fa-upload"></i> Upload Pamphlet
+                        </button>
+                        <button class="btn btn-outline" onclick="app.loadPamphlets()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pamphlet-stats">
+                    <div class="pamphlet-stat-card">
+                        <div class="stat-number" id="total-pamphlets">0</div>
+                        <div class="stat-label">Total Pamphlets</div>
+                    </div>
+                    <div class="pamphlet-stat-card">
+                        <div class="stat-number" id="pamphlet-vehicles">0</div>
+                        <div class="stat-label">Vehicle Models</div>
+                    </div>
+                    <div class="pamphlet-stat-card">
+                        <div class="stat-number" id="pamphlet-storage">0 MB</div>
+                        <div class="stat-label">Storage Used</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Pamphlet</th>
+                                <th>Name</th>
+                                <th>Vehicle Model</th>
+                                <th>Size</th>
+                                <th>Uploaded On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pamphlet-list">
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading pamphlets...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Inventory Modal -->
+        <div id="inventory-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add New Model to Inventory</h3>
+                    <button class="modal-close" onclick="app.closeInventoryModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="inventory-form" onsubmit="event.preventDefault(); app.saveInventory();">
+                        <div class="form-group">
+                            <label class="required">Vehicle Type</label>
+                            <select id="inventory-type" class="form-control" required>
+                                <option value="">Select Type</option>
+                                <option value="car">Car</option>
+                                <option value="bike">Bike</option>
+                                <option value="tractor">Tractor</option>
+                                <option value="threewheeler">3 Wheeler</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Brand</label>
+                            <input type="text" id="inventory-brand" class="form-control"
+                                placeholder="e.g., Mahindra, Hero" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Model</label>
+                            <input type="text" id="inventory-model" class="form-control"
+                                placeholder="e.g., Scorpio, Splendor" required>
+                        </div>
+                        <p class="text-muted small">This model will be available for selection when adding new
+                            enquiries.</p>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="app.closeInventoryModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="app.saveInventory()">Add Model</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Modal - UPDATED with Manual Password Field -->
+        <div id="team-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add Team Member</h3>
+                    <button class="modal-close" onclick="app.closeTeamModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="team-form">
+                        <div class="form-group">
+                            <label class="required">Full Name</label>
+                            <input type="text" id="team-name" class="form-control" placeholder="Enter full name"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Email Address</label>
+                            <input type="email" id="team-email" class="form-control"
+                                placeholder="Will be used for login" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Phone Number</label>
+                            <input type="tel" id="team-phone" class="form-control" placeholder="10-digit mobile number"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <select id="team-role" class="form-control">
+                                <option value="sales">Sales Manager</option>
+                                <option value="senior">Senior Sales Manager</option>
+                                <option value="salesperson">Sales Person</option>
+                            </select>
+                        </div>
+
+                        <!-- Manual Password Field -->
+                        <div class="form-group">
+                            <label class="required">Set Password</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="team-password" class="form-control"
+                                    placeholder="Enter password for team member" required>
+                                <button type="button" class="toggle-password"
+                                    onclick="app.togglePasswordVisibility('team-password', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">Choose an easy-to-remember password for your team member</small>
+                        </div>
+
+                        <!-- Password strength indicator -->
+                        <div id="password-strength" style="margin-top: 5px; font-size: 0.8rem;"></div>
+
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="team-password-confirm" class="form-control"
+                                    placeholder="Confirm password" required>
+                                <button type="button" class="toggle-password"
+                                    onclick="app.togglePasswordVisibility('team-password-confirm', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="password-display" id="manual-password-info"
+                            style="display: none; background: var(--success-light); border-color: var(--success);">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            <span>Password will be set manually</span>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="app.closeTeamModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="app.saveTeamMember()">Add Member</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Password Modal -->
+        <div id="view-password-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-key"></i> Team Member Password</h3>
+                    <button class="modal-close" onclick="app.closeViewPasswordModal()">&times;</button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Password for <strong id="password-member-name"></strong></p>
+                    <div class="password-display" id="view-password-display" style="font-size: 1.5rem; margin: 1rem 0;">
+                        <!-- Password will be shown here -->
+                    </div>
+                    <p class="text-muted small">Make sure to share this password securely with the team member.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="app.closeViewPasswordModal()">Close</button>
+                    <button class="btn btn-primary" onclick="app.copyPasswordToClipboard()">
+                        <i class="fas fa-copy"></i> Copy Password
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Intervention Modal -->
+        <div id="intervention-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create New Intervention</h3>
+                    <button class="modal-close" onclick="app.closeInterventionModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="intervention-form">
+                        <div class="form-group">
+                            <label class="required">Select Enquiry</label>
+                            <select id="intervention-enquiry" class="form-control" required>
+                                <option value="">Select Enquiry</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Priority</label>
+                            <select id="intervention-priority" class="form-control">
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Message</label>
+                            <textarea id="intervention-message" class="form-control" rows="3"
+                                placeholder="Enter instructions for sales manager" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Assign To</label>
+                            <select id="intervention-assignee" class="form-control">
+                                <option value="">Select Sales Manager</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Deadline</label>
+                            <input type="date" id="intervention-deadline" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="app.closeInterventionModal()">Cancel</button>
+                    <button class="btn btn-warning" onclick="app.saveIntervention()">Create Intervention</button>
+                </div>
+            </div>
+        </div>
+        <!-- Upload Pamphlet Modal -->
+        <div id="upload-pamphlet-modal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-upload"></i> Upload Pamphlet</h3>
+                    <button class="modal-close" onclick="app.closeUploadPamphletModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="upload-pamphlet-form">
+                        <div class="form-group">
+                            <label>Pamphlet Name *</label>
+                            <input type="text" id="pamphlet-name" class="form-control"
+                                placeholder="e.g., Diwali Offer 2025">
+                        </div>
+                        <div class="form-group">
+                            <label>Vehicle Model *</label>
+                            <select id="pamphlet-vehicle-model" class="form-control">
+                                <option value="">Select Vehicle Model</option>
+                                <!-- Will be populated from inventory -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Upload Image (JPG, PNG) *</label>
+                            <div class="pamphlet-upload-area" id="pamphlet-drop-zone">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag & drop or click to upload</p>
+                                <small class="text-muted">Max size: 2MB | Recommended: 800Ã—600</small>
+                                <input type="file" id="pamphlet-file" accept="image/*" style="display: none;">
+                            </div>
+                            <div id="pamphlet-file-preview" style="display: none; margin-top: 1rem;">
+                                <img id="pamphlet-preview-img"
+                                    style="max-width: 100%; max-height: 200px; border-radius: var(--radius);">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Default Message Template</label>
+                            <textarea id="pamphlet-message" class="form-control" rows="3">Hi {customer_name},
+
+Check out this special offer on {vehicle_model}!
+
+{offer_details}
+
+Visit us: {showroom_address}</textarea>
+                            <small class="text-muted">Use {customer_name}, {vehicle_model}, {showroom_address} as
+                                placeholders</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="app.closeUploadPamphletModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="app.savePamphlet()">Upload</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Send Pamphlet Modal -->
+        <div id="send-pamphlet-modal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-image"></i> Send Pamphlet to Customer</h3>
+                    <button class="modal-close" onclick="app.closeSendPamphletModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div
+                        style="margin-bottom: 1rem; padding: 0.5rem; background: var(--bg-secondary); border-radius: var(--radius);">
+                        <p><strong>Customer:</strong> <span id="send-customer-name"></span></p>
+                        <p><strong>Phone:</strong> <span id="send-customer-phone"></span></p>
+                        <p><strong>Vehicle Model:</strong> <span id="send-vehicle-model"></span></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Pamphlet</label>
+                        <div id="pamphlet-grid" class="pamphlet-grid">
+                            <div class="text-center text-muted py-4">Loading pamphlets...</div>
+                        </div>
+                    </div>
+
+                    <div id="pamphlet-preview-container" style="display: none;">
+                        <label>Selected Pamphlet Preview</label>
+                        <img id="send-pamphlet-preview" class="pamphlet-preview" src="" alt="Pamphlet Preview">
+                    </div>
+
+                    <div class="form-group">
+                        <label>WhatsApp Message</label>
+                        <div class="whatsapp-preview-box">
+                            <i class="fab fa-whatsapp" style="color: #25D366;"></i>
+                            <div class="message-preview" id="send-message-preview">
+                                Loading...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Edit Message (Optional)</label>
+                        <textarea id="send-custom-message" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="app.closeSendPamphletModal()">Cancel</button>
+                    <button class="btn btn-success" id="send-whatsapp-pamphlet-btn"
+                        onclick="app.sendPamphletViaWhatsApp()">
+                        <i class="fab fa-whatsapp"></i> Send via WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Trial Expiration Overlay -->
+    <!-- Trial Expiration Overlay -->
+    <div id="trial-expired-overlay" class="trial-expired-overlay">
+        <div class="trial-expired-modal">
+            <div class="trial-expired-icon">
+                <i class="fas fa-hourglass-end"></i>
+            </div>
+            <h2>Trial Period Ended</h2>
+            <p>Your 30-day free trial has expired. To continue using ShowroomDesk and access all features, please
+                upgrade to the premium plan.</p>
+            <button class="btn-upgrade" id="trial-upgrade-btn">
+                <i class="fas fa-crown"></i> Upgrade to Premium
+            </button>
+            <div class="expiry-date" id="trial-expiry-date"></div>
+        </div>
+    </div>
+    <script type="module" src="./src/app/bootstrap.js"></script>
+</body>
+
+</html>
+
