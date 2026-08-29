@@ -6716,9 +6716,13 @@ Reply with your convenient time for a test drive.
 
       console.log("Saving team member with showroom data:", safeShowroomData);
 
+      // Written via secondaryDb (bound to the secondary auth instance) so
+      // this create happens while the NEW user is the authenticated party
+      // (request.auth.uid === uid), matching your existing Firestore rules
+      // that allow a user to create their own "users/{uid}" document.
       await window.firebase.setDoc(
         window.firebase.doc(
-          window.firebase.db,
+          window.firebase.secondaryDb,
           "users",
           userCredential.user.uid,
         ),
