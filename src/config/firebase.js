@@ -28,6 +28,12 @@
         // triggers the owner's onAuthStateChanged listener at all.
         const secondaryApp = initializeApp(firebaseConfig, "Secondary");
         const secondaryAuth = getAuth(secondaryApp);
+        // Firestore instance bound to the SECONDARY app, used to write the
+        // new team member's own "users/{uid}" document while THEY are the
+        // authenticated user (request.auth.uid === uid). This matches your
+        // existing Firestore rules (which allow a user to create their own
+        // document) without requiring any rules changes.
+        const secondaryDb = getFirestore(secondaryApp);
 
         // Enable offline persistence for faster subsequent loads
         enableIndexedDbPersistence(db).catch((err) => {
@@ -41,7 +47,7 @@
         // Make Firebase available globally
         window.firebase = {
             app, auth, db,
-            secondaryAuth,
+            secondaryAuth, secondaryDb,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
             signOut,
