@@ -1,4 +1,4 @@
-﻿
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp, Timestamp, getDoc, setDoc, limit, arrayUnion, arrayRemove, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -18,6 +18,17 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Secondary, isolated Firebase app instance used ONLY for creating
+        // new team-member logins (Team section). Firebase's client SDK
+        // auto-signs-in as whichever user you just created, so creating a
+        // login on the SAME auth instance the owner is logged into was
+        // knocking the owner out of their session and forcing a full
+        // dashboard reset. Using a completely separate app/auth instance
+        // means creating a team login never touches the owner's session or
+        // triggers the owner's onAuthStateChanged listener at all.
+        const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+        const secondaryAuth = getAuth(secondaryApp);
+
         // Enable offline persistence for faster subsequent loads
         enableIndexedDbPersistence(db).catch((err) => {
             if (err.code == 'failed-precondition') {
@@ -30,6 +41,7 @@
         // Make Firebase available globally
         window.firebase = {
             app, auth, db,
+            secondaryAuth,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
             signOut,
