@@ -33,7 +33,7 @@ class ShowroomDeskCRM {
     // callGeminiAI() below behind a small Firebase Cloud Function so the key
     // never ships to the browser. Nothing else about this feature needs to
     // change when you do that.
-    this.GEMINI_API_KEY = "PASTE_YOUR_GEMINI_API_KEY_HERE";
+    this.GEMINI_API_KEY = "AQ.Ab8RN6IJTP8SgzLV-BVSciuiOg17xhORKlZq73I87EL3tTUAvQ";
     // If Google renames/retires this model, check the current list at
     // https://ai.google.dev/gemini-api/docs/models and swap the string below.
     this.GEMINI_MODEL = "gemini-2.5-flash";
