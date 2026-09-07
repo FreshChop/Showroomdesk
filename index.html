@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -17,7 +17,7 @@
     <!-- Firebase SDK -->
     <script type="module" src="./src/config/firebase.js"></script>
 
-    
+
     <link rel="stylesheet" href="./src/styles/app.css">
 </head>
 
@@ -408,6 +408,7 @@
                     <div class="logo-text">
                         <h1>ShowroomDesk</h1>
                         <span class="logo-subtitle" id="header-showroom-name">Loading...</span>
+                        <span class="logo-subtitle" id="header-user-role-name" style="opacity:0.85;">Loading...</span>
                     </div>
                 </div>
 
@@ -434,7 +435,7 @@
                         <i class="fas fa-chart-line"></i>
                         <span class="nav-text">Analytics</span>
                     </button>
-                    <button class="nav-btn" data-section="reports">
+                    <button class="nav-btn owner-only" data-section="reports">
                         <i class="fas fa-file-alt"></i>
                         <span class="nav-text">Reports</span>
                     </button>
@@ -474,7 +475,8 @@
                     </button>
 
                     <div class="user-dropdown">
-                        <button class="user-profile" type="button" onclick="app.toggleUserMenu(event)" aria-expanded="false">
+                        <button class="user-profile" type="button" onclick="app.toggleUserMenu(event)"
+                            aria-expanded="false">
                             <div class="user-avatar">
                                 <i class="fas fa-user-circle"></i>
                             </div>
@@ -648,17 +650,17 @@
                     <div class="filter-group">
                         <select id="filter-source" onchange="app.filterEnquiries()">
                             <option value="">All Sources</option>
-                            <option value="Walk In Customer">ðŸš¶ Walk In Customer</option>
-                            <option value="Advertisement">ðŸ“¢ Advertisement</option>
-                            <option value="CRM enquiry">ðŸ“± CRM Enquiry</option>
-                            <option value="Field Enquiry">ðŸŒ Field Enquiry</option>
+                            <option value="Walk In Customer"> Walk In Customer</option>
+                            <option value="Advertisement"> Advertisement</option>
+                            <option value="CRM enquiry"> CRM Enquiry</option>
+                            <option value="Field Enquiry"> Field Enquiry</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <select id="filter-lead-type" onchange="app.filterEnquiries()">
                             <option value="">All Lead Types</option>
-                            <option value="hot">ðŸ”¥ Hot (Status: Hot)</option>
-                            <option value="warm">ðŸŸ¡ Warm (Follow-up within 30 days)</option>
+                            <option value="hot"> Hot (Status: Hot)</option>
+                            <option value="warm"> Warm (Follow-up within 30 days)</option>
                             <option value="cold">❄️ Cold (Follow-up after 30+ days)</option>
                         </select>
                     </div>
@@ -725,10 +727,10 @@
                             <label class="required">Enquiry Source</label>
                             <select id="enquiry-source" class="form-control" required>
                                 <option value="">Select Source</option>
-                                <option value="Walk In Customer">ðŸš¶ Walk In Customer</option>
-                                <option value="Advertisement">ðŸ“¢ Advertisement</option>
-                                <option value="CRM enquiry">ðŸ“± CRM Enquiry</option>
-                                <option value="Field Enquiry">ðŸŒ Field Enquiry</option>
+                                <option value="Walk In Customer"> Walk In Customer</option>
+                                <option value="Advertisement"> Advertisement</option>
+                                <option value="CRM enquiry"> CRM Enquiry</option>
+                                <option value="Field Enquiry"> Field Enquiry</option>
                             </select>
                         </div>
 
@@ -857,6 +859,26 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-outline" onclick="app.closeRemarksHistoryModal()">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: AI Deal Assistant Modal -->
+            <div id="ai-suggestion-modal" class="modal-overlay">
+                <div class="modal-content" style="max-width: 550px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-robot"></i> AI Deal Assistant - <span id="ai-suggestion-customer-name"></span></h3>
+                        <button class="modal-close" onclick="app.closeAISuggestionModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="ai-suggestion-body">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-spinner fa-spin"></i> Loading...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="app.closeAISuggestionModal()">Close</button>
                     </div>
                 </div>
             </div>
@@ -1757,7 +1779,7 @@ Visit us: {showroom_address}</textarea>
         </div>
     </div>
 
-    
+
     <!-- Trial Expiration Overlay -->
     <!-- Trial Expiration Overlay -->
     <div id="trial-expired-overlay" class="trial-expired-overlay">
@@ -1778,4 +1800,3 @@ Visit us: {showroom_address}</textarea>
 </body>
 
 </html>
-
