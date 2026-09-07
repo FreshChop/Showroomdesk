@@ -1,4 +1,4 @@
-﻿
+
         /* ==========================================================================
            CSS Reset & Base Styles
            ========================================================================== */
@@ -720,6 +720,17 @@
         .btn-success {
             background: var(--success);
             color: white;
+        }
+
+        .btn-ai {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-ai:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            opacity: 0.95;
         }
 
         .btn-success:hover {
@@ -2466,7 +2477,7 @@
                 width: 100%;
                 flex-wrap: nowrap;
             }
-
+            
             .main-nav::-webkit-scrollbar {
                 height: 3px;
             }
@@ -3759,5 +3770,9 @@
             @keyframes slideDown {
                 from { transform: translateY(-100%); }
                 to { transform: translateY(0); }
+            }
+
+            .nav-text{
+                font-size: 1.0rem;
             }
         
