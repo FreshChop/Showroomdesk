@@ -785,6 +785,17 @@
                             </select>
                         </div>
 
+                        <!-- NEW: Assign To - defaults to the logged-in user (by their own
+                             uid/showroom), but lets the creator hand this enquiry to another
+                             registered non-owner team member instead. -->
+                        <div class="form-group">
+                            <label>Assign To</label>
+                            <select id="enquiry-assign-to" class="form-control">
+                                <option value="">Loading...</option>
+                            </select>
+                            <small class="text-muted">Defaults to you. Pick a team member here to assign this enquiry to them instead.</small>
+                        </div>
+
                         <!-- NEW: Booking Amount Field - Shows only when status is Booking Done -->
                         <div id="booking-fields" style="display: none;" class="booking-section full-width">
                             <h4><i class="fas fa-rupee-sign"></i> Booking Details</h4>
@@ -859,26 +870,6 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-outline" onclick="app.closeRemarksHistoryModal()">Close</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- NEW: AI Deal Assistant Modal -->
-            <div id="ai-suggestion-modal" class="modal-overlay">
-                <div class="modal-content" style="max-width: 550px;">
-                    <div class="modal-header">
-                        <h3><i class="fas fa-robot"></i> AI Deal Assistant - <span id="ai-suggestion-customer-name"></span></h3>
-                        <button class="modal-close" onclick="app.closeAISuggestionModal()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="ai-suggestion-body">
-                            <div class="text-center text-muted py-4">
-                                <i class="fas fa-spinner fa-spin"></i> Loading...
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-outline" onclick="app.closeAISuggestionModal()">Close</button>
                     </div>
                 </div>
             </div>
