@@ -21,24 +21,6 @@ class ShowroomDeskCRM {
     // Razorpay live keys
     this.RAZORPAY_KEY_ID = "rzp_live_SGLHT8GJ1V9Axy";
 
-    // ==========================================================================
-    // AI Deal Assistant (Gemini Flash) - FREE TIER CONFIG
-    // ==========================================================================
-    // Get a free key at https://aistudio.google.com/apikey (no card needed).
-    // IMPORTANT SECURITY NOTE: unlike RAZORPAY_KEY_ID above (a public key
-    // that's safe to expose), a Gemini API key is a SECRET. Putting it here
-    // means anyone can view-source your site and copy it, letting them burn
-    // through (or abuse) your free quota. This is fine to get the feature
-    // working today; when you're ready, move the actual fetch() call in
-    // callGeminiAI() below behind a small Firebase Cloud Function so the key
-    // never ships to the browser. Nothing else about this feature needs to
-    // change when you do that.
-    this.GEMINI_API_KEY = "";
-    // If Google renames/retires this model, check the current list at
-    // https://ai.google.dev/gemini-api/docs/models and swap the string below.
-    this.GEMINI_MODEL = "gemini-3.6-flash";
-
-
     // Vehicle brands database with default models
     this.vehicleBrands = {
       car: [
@@ -795,7 +777,14 @@ class ShowroomDeskCRM {
       this.loadInventoryModels();
       this.toggleExchangeFields();
       this.toggleBookingFields();
-       this.populateAssignToDropdown()
+      // Team data is normally only loaded for owners elsewhere in the app.
+      // Every role needs it here so the "Assign To" dropdown can list
+      // registered team members regardless of who is adding the enquiry.
+      if (this.team && this.team.length > 0) {
+        this.populateAssignToDropdown();
+      } else {
+        this.loadTeam().then(() => this.populateAssignToDropdown());
+      }
     } else if (sectionId === "interventions") {
       this.loadInterventions();
     } else if (sectionId === "analytics") {
@@ -3350,9 +3339,6 @@ Reply with your convenient time for a test drive.
                         <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); app.showEditEnquiryModal('${enquiry.id}')">
                          <i class="fas fa-edit"></i> Edit
                         </button>
-                        <button class="btn btn-sm btn-ai" onclick="event.stopPropagation(); app.showAISuggestion('${enquiry.id}')" title="AI Suggestions to close this deal">
-                         <i class="fas fa-robot"></i>
-                        </button>
                     ${
                       isHotOrWarm
                         ? `
@@ -3615,205 +3601,10 @@ Reply with your convenient time for a test drive.
   }
 
   // ==========================================================================
-  // AI Deal Assistant (Gemini Flash) - NEW
-  // Reads a specific customer's full remarks history plus enquiry details
-  // and suggests a concrete next step to help close that deal. Available
-  // to sales person, sales manager, senior sales manager, and owner alike
-  // (it only ever sees enquiries the logged-in user already has access to,
-  // same as the rest of the app).
-  // ==========================================================================
-
-  // Low-level call to Gemini. Kept as its own method so that later, moving
-  // this behind a Firebase Cloud Function proxy (recommended for
-  // production, to keep the API key off the client) only requires changing
-  // the fetch() below - nothing else in the feature needs to change.
-  async callGeminiAI(prompt) {
-    if (!this.GEMINI_API_KEY || this.GEMINI_API_KEY === "PASTE_YOUR_GEMINI_API_KEY_HERE") {
-      throw new Error(
-        "Gemini API key not set. Add a free key from https://aistudio.google.com/apikey to GEMINI_API_KEY in ShowroomDeskCRM.js.",
-      );
-    }
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.GEMINI_MODEL}:generateContent`;
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": this.GEMINI_API_KEY,
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.4,
-          maxOutputTokens: 500,
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      const errBody = await response.json().catch(() => ({}));
-      const errMsg =
-        errBody?.error?.message || `Gemini API error (HTTP ${response.status})`;
-      throw new Error(errMsg);
-    }
-
-    const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) {
-      throw new Error("Gemini returned an empty response. Please try again.");
-    }
-    return text;
-  }
-
-  // Pulls the full remarksHistory subcollection for one enquiry as plain
-  // chronological text, so the AI can see how the conversation evolved,
-  // not just the latest remarks field.
-  async getRemarksHistoryText(enquiryId) {
-    try {
-      const historyRef = window.firebase.collection(
-        window.firebase.db,
-        "enquiries",
-        enquiryId,
-        "remarksHistory",
-      );
-      const q = window.firebase.query(
-        historyRef,
-        window.firebase.orderBy("timestamp", "asc"),
-      );
-      const snapshot = await window.firebase.getDocs(q);
-
-      if (snapshot.empty) return "(No remarks history recorded yet)";
-
-      let lines = [];
-      snapshot.forEach((doc) => {
-        const d = doc.data();
-        const date = d.timestamp
-          ? new Date(d.timestamp).toLocaleDateString()
-          : "Unknown date";
-        lines.push(`- [${date}] ${d.changedBy || "Unknown"}: "${d.newRemarks || ""}"`);
-      });
-      return lines.join("\n");
-    } catch (error) {
-      console.error("Error fetching remarks history for AI:", error);
-      return "(Remarks history unavailable)";
-    }
-  }
-
-  // Opens the AI Suggestion modal and kicks off generation for one enquiry.
-  async showAISuggestion(enquiryId) {
-    const enquiry = this.enquiries.find((e) => e.id === enquiryId);
-    if (!enquiry) {
-      this.showToast("Enquiry not found", "error");
-      return;
-    }
-
-    document.getElementById("ai-suggestion-customer-name").textContent =
-      enquiry.customerName || "Unknown";
-
-    const bodyEl = document.getElementById("ai-suggestion-body");
-    bodyEl.innerHTML = `
-      <div class="text-center text-muted py-4">
-        <i class="fas fa-spinner fa-spin"></i> Reading remarks and preparing suggestions...
-      </div>
-    `;
-    document.getElementById("ai-suggestion-modal").classList.add("active");
-
-    try {
-      const historyText = await this.getRemarksHistoryText(enquiryId);
-      const vehicleInfo = enquiry.isExchange
-        ? `Exchange enquiry for: ${enquiry.exchangeModel || "unspecified vehicle"}`
-        : `Interested in: ${enquiry.vehicleModel || "unspecified vehicle"}`;
-      const daysSinceCreated = enquiry.createdAt
-        ? Math.max(
-            0,
-            Math.floor((new Date() - new Date(enquiry.createdAt)) / 86400000),
-          )
-        : "unknown";
-
-      const prompt = `You are a sales coaching assistant for an Indian vehicle showroom CRM called ShowroomDesk. A sales team member needs help closing a specific deal. Based on the customer data below, give a short, practical, actionable response.
-
-Customer: ${enquiry.customerName || "Unknown"}
-${vehicleInfo}
-Source: ${enquiry.source || "Unknown"}
-Current status: ${enquiry.status || "new"}
-Days since first enquiry: ${daysSinceCreated}
-Follow-up date on file: ${enquiry.followupDate ? new Date(enquiry.followupDate).toLocaleDateString() : "Not set"}
-Booking amount (if any): ${enquiry.bookingAmount ? "₹" + enquiry.bookingAmount : "None yet"}
-Latest remarks: "${enquiry.remarks || "None"}"
-
-Full remarks history (oldest to newest):
-${historyText}
-
-Respond in this exact short format, no extra preamble:
-LEAD SUMMARY: (one sentence on where this deal stands)
-NEXT ACTION: (one specific action - call, WhatsApp, showroom visit, etc - and when)
-TALKING POINTS: (2-3 short bullet points to address this customer's specific objections or interests, based on the remarks)
-RISK: (one sentence on the biggest risk of losing this deal, or "Low risk" if none apparent)`;
-
-      const aiText = await this.callGeminiAI(prompt);
-      bodyEl.innerHTML = this.formatAISuggestion(aiText);
-    } catch (error) {
-      console.error("Error getting AI suggestion:", error);
-      bodyEl.innerHTML = `
-        <div class="text-center py-4" style="color: var(--danger);">
-          <i class="fas fa-exclamation-triangle"></i><br>
-          ${error.message || "Something went wrong generating the suggestion."}
-        </div>
-      `;
-    }
-  }
-
-  // Turns the AI's plain-text labeled response into simple styled HTML.
-  formatAISuggestion(text) {
-    const sections = [
-      { key: "LEAD SUMMARY:", icon: "fa-info-circle", color: "var(--primary)" },
-      { key: "NEXT ACTION:", icon: "fa-bolt", color: "var(--success)" },
-      { key: "TALKING POINTS:", icon: "fa-comments", color: "var(--warning)" },
-      { key: "RISK:", icon: "fa-exclamation-triangle", color: "var(--danger)" },
-    ];
-
-    let html = "";
-    let remaining = text;
-
-    sections.forEach((section, i) => {
-      const startIdx = remaining.indexOf(section.key);
-      if (startIdx === -1) return;
-      const nextSection = sections
-        .slice(i + 1)
-        .map((s) => remaining.indexOf(s.key))
-        .find((idx) => idx !== -1);
-      const endIdx = nextSection !== undefined ? nextSection : remaining.length;
-      const content = remaining
-        .substring(startIdx + section.key.length, endIdx)
-        .trim();
-
-      html += `
-        <div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--radius); border-left: 3px solid ${section.color};">
-          <div style="font-weight: 600; color: ${section.color}; margin-bottom: 0.35rem;">
-            <i class="fas ${section.icon}"></i> ${section.key.replace(":", "")}
-          </div>
-          <div style="white-space: pre-line; font-size: 0.9rem;">${content}</div>
-        </div>
-      `;
-    });
-
-    return (
-      html ||
-      `<div style="white-space: pre-line;">${text}</div>`
-    );
-  }
-
-  closeAISuggestionModal() {
-    document.getElementById("ai-suggestion-modal").classList.remove("active");
-  }
-
-  // ==========================================================================
   // Refresh Inventory (manual refresh button)
   // ==========================================================================
   refreshInventory() {
     this.loadInventory(true);
-
     this.showToast("Refreshing inventory...", "info");
   }
 
@@ -7111,6 +6902,22 @@ Reply with your convenient time for a test drive.
       return;
     }
 
+    // Determine who this enquiry belongs to. If the creator picked someone
+    // in "Assign To", the enquiry is assigned exclusively to that team
+    // member (matched against this.team, loaded via populateAssignToDropdown).
+    // If left blank, it stays with the person creating it - unchanged from
+    // the existing behavior.
+    const assignToUid = document.getElementById("enquiry-assign-to")?.value || "";
+    let assignedSalesManagerId = this.currentUser.uid;
+    let assignedSalesManagerName = document.getElementById("user-name").textContent;
+    if (assignToUid) {
+      const assignedMember = this.team.find((m) => m.uid === assignToUid);
+      if (assignedMember) {
+        assignedSalesManagerId = assignedMember.uid;
+        assignedSalesManagerName = assignedMember.name;
+      }
+    }
+
     // Base enquiry data
     const enquiryData = {
       customerName: document
@@ -7124,11 +6931,12 @@ Reply with your convenient time for a test drive.
       followupDate: document.getElementById("enquiry-followup").value,
       remarks: document.getElementById("enquiry-remarks").value.trim(),
       showroomId: this.showroomData.id,
-      salesManagerId: this.currentUser.uid,
-      salesManagerName: document.getElementById("user-name").textContent,
+      salesManagerId: assignedSalesManagerId,
+      salesManagerName: assignedSalesManagerName,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+
 
     // Add booking amount if status is booking
     if (status === "booking") {
@@ -7256,12 +7064,14 @@ Reply with your convenient time for a test drive.
                 `;
 
       alert(
+        'Sales Manager: ' + (enquiry.salesManagerName || 'Unassigned') + '\n' +
         "View enquiry details - " +
           enquiry.customerName +
           "\n\n" +
           "Phone: " +
           enquiry.phone +
           "\n" +
+          'Created: ' + (enquiry.createdAt ? new Date(enquiry.createdAt).toLocaleString() : 'Unknown') + '\n' +
           "Source: " +
           (enquiry.source || "N/A") +
           "\n" +
@@ -7423,25 +7233,26 @@ Reply with your convenient time for a test drive.
   populateAssignToDropdown() {
     const select = document.getElementById('enquiry-assign-to');
     if (!select) return;
-    select.innerHTML = '<option value="">Select Sales Manager</option>';
+
+    // First option is always the logged-in user themselves (by their own
+    // uid, matching this.currentUser.uid and this.showroomData.id), shown
+    // with their real name and selected by default - replacing the old
+    // generic "Keep with me" placeholder.
+    const myName = document.getElementById('user-name')?.textContent || 'Me';
+    select.innerHTML = `<option value="${this.currentUser.uid}">${myName} (Me)</option>`;
+
     if (this.team && this.team.length > 0) {
-        this.team.forEach(member => {
+        this.team
+          .filter(member => member.uid !== this.currentUser.uid)
+          .forEach(member => {
             const option = document.createElement('option');
             option.value = member.uid;
             option.textContent = member.name + ' (' + (member.role || 'sales') + ')';
-            // Optionally pre-select the current user if they are not owner
-            if (this.userRole === 'owner' && this.team.length === 1) {
-                // auto-select if only one team member? (optional)
-            }
             select.appendChild(option);
-        });
-    } else {
-        const option = document.createElement('option');
-        option.value = '';
-        option.disabled = true;
-        option.textContent = 'No team members found';
-        select.appendChild(option);
+          });
     }
+
+    select.value = this.currentUser.uid;
 }
 
   updateCurrentDate() {
